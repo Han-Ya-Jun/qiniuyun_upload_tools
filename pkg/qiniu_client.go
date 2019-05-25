@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/qiniu/api.v7/auth/qbox"
 	"github.com/qiniu/api.v7/storage"
+	"os"
+	"sync"
 	"time"
 )
 
@@ -14,6 +16,7 @@ import (
 * @Name:pkg
 * @Function:
  */
+var once sync.Once
 
 type QiNiuClient struct {
 	AccessKey     string `json:"access_key"`
@@ -37,7 +40,8 @@ func NewClient(accessKey, secretKey, bucket string, Zone int, useHttps, useCdnDo
 	}
 }
 
-func (client *QiNiuClient) UploadFile(fileList []string) {
+func (client *QiNiuClient) UploadFile(fileList []string) []string {
+	var successUrlList []string
 	putPolicy := storage.PutPolicy{
 		Scope: client.Bucket,
 	}
@@ -59,11 +63,57 @@ func (client *QiNiuClient) UploadFile(fileList []string) {
 		//	"x:name": "github logo",
 		//},
 	}
-	key := time.Now().Unix() + "_"
-	err := formUploader.PutFile(context.Background(), &ret, upToken, key, localFile, &putExtra)
-	if err != nil {
-		fmt.Println(err)
-		return
+	for _, f := range fileList {
+		localFile := "need_upload_data/" + f
+		key := time.Now().Format("20060102150405") + "_" + f
+		err := formUploader.PutFile(context.Background(), &ret, upToken, key, localFile, &putExtra)
+		if err != nil {
+			fmt.Println("fail upload " + f)
+			once.Do(
+				func() {
+					if !Exists("fail_upload/") {
+						// 创建文件夹
+						err := os.Mkdir("fail_upload/", os.ModePerm)
+						if err != nil {
+							fmt.Printf("mkdir failed![%v]\n", err)
+						} else {
+							fmt.Printf("mkdir success!\n")
+						}
+					}
+				})
+			_ = os.Rename(localFile, "fail_upload/"+f)
+		} else {
+			fmt.Println("success upload   " + f)
+			successUrlList = append(successUrlList, client.Domain+key)
+			once.Do(
+				func() {
+					if !Exists("success_upload/") {
+						// 创建文件夹
+						err := os.Mkdir("success_upload/", os.ModePerm)
+						if err != nil {
+							fmt.Printf("mkdir failed![%v]\n", err)
+						} else {
+							fmt.Printf("mkdir success!\n")
+						}
+					}
+				})
+			_ = os.Rename(localFile, "success_upload/"+f)
+			fmt.Println(ret.Key, ret.Hash)
+		}
+
 	}
-	fmt.Println(ret.Key, ret.Hash)
+	return successUrlList
+
+}
+
+// 判断文件夹是否存在
+func Exists(path string) bool {
+	_, err := os.Stat(path) //os.Stat获取文件信息
+	if err != nil {
+		if os.IsExist(err) {
+			return true
+		}
+		return false
+	}
+	return true
 }

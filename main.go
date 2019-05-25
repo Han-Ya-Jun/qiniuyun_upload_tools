@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"os"
+	"os/exec"
+	"qiniuyun_upload_tools/pkg"
+	"time"
 )
 
 /*
@@ -15,39 +17,19 @@ import (
  */
 
 func main() {
-	fileList := readDirectory("need_upload_data")
-	printFileList(fileList)
+	config := pkg.LoadConfig()
+	client := pkg.NewClient(config.AccessKey, config.SecretKey, config.Bucket, config.Zone, config.UseHTTPS, config.UseCdnDomains, config.Domain)
+	fileList := pkg.ReadDirectory("need_upload_data")
+	pkg.PrintFileList(fileList)
+	successFileList := client.UploadFile(fileList)
 	t, _ := template.ParseFiles("templates/success.html")
-	fmt.Println(t.Name())
-	fileObj, err := os.OpenFile("success.html", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+	successFileName := time.Now().Format("20060102150405") + "_success.html"
+	fileObj, err := os.OpenFile(successFileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		fmt.Println("Failed to open the file", err.Error())
 		os.Exit(2)
 	}
-	_ = t.Execute(fileObj, fileList)
-}
-
-func readDirectory(dir string) (fl []string) {
-
-	files, _ := ioutil.ReadDir(dir)
-
-	var fileList []string
-	fileList = make([]string, len(files))
-
-	i := 0
-	for _, file := range files {
-		if file.IsDir() {
-			continue
-		} else {
-			fileList[i] = file.Name()
-			i++
-		}
-	}
-	return fileList
-}
-
-func printFileList(fl []string) {
-	for i := 0; i < len(fl); i++ {
-		fmt.Println(fl[i])
-	}
+	_ = t.Execute(fileObj, successFileList)
+	cmd := exec.Command("explorer", successFileName)
+	cmd.Start()
 }

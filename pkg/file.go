@@ -15,7 +15,7 @@ import (
 /*
  * 读取目录内的文件
  */
-func readDirectory(dir string) (fl []string) {
+func ReadDirectory(dir string) (fl []string) {
 
 	files, _ := ioutil.ReadDir(dir)
 
@@ -34,7 +34,7 @@ func readDirectory(dir string) (fl []string) {
 	return fileList
 }
 
-func printFileList(fl []string) {
+func PrintFileList(fl []string) {
 	for i := 0; i < len(fl); i++ {
 		fmt.Println(fl[i])
 	}

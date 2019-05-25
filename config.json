@@ -1,8 +1,9 @@
 {
-    "access_key": "*******",
-    "secret_key": "*******",
+    "access_key": "**************************",
+    "secret_key": "****************************",
     "zone": 0,
     "Bucket": "hanyajun",
     "use_https": false,
-    "bucket": "http://cdn.hanyajun.com/"
+    "use_cdn_domains":false,
+    "Domain": "http://cdn.hanyajun.com/"
 }
