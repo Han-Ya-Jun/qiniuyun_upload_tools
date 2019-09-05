@@ -1,7 +1,7 @@
 #### [qiniuyun_upload_tools](https://github.com/Han-Ya-Jun/qiniuyun_upload_tools)
 最近写博客发现经常要上传图片到七牛云上去，每次打开网页登录然后上传感觉很慢，windows也没有一个好的上传工具，于是写了这样的一个工具。
 #### 效果
-![](https://user-gold-cdn.xitu.io/2019/5/26/16af0222b210bbd5?w=1844&h=974&f=gif&s=1845161)
+![](https://imgconvert.csdnimg.cn/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAxOS81LzI2LzE2YWYwMjIyYjIxMGJiZDU?x-oss-process=image/format,png)
 #### 使用方法
 ##### 下载程序包[点击下载](https://github.com/Han-Ya-Jun/qiniuyun_upload_tools/releases/download/1.0.0/qiniu_upload_tools.zip)
 ##### 解压后直接在config.json文件里面天上自己七牛云相关的信息。<br>
